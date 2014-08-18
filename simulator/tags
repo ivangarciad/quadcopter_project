@@ -1,0 +1,18 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+customColourVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> customColourVis (pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)$/;"	f
+interactionCustomizationVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> interactionCustomizationVis ()$/;"	f
+keyboardEventOccurred	simulator.cpp	/^void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event,$/;"	f
+main	simulator.cpp	/^main (int argc, char** argv)$/;"	f
+mouseEventOccurred	simulator.cpp	/^void mouseEventOccurred (const pcl::visualization::MouseEvent &event,$/;"	f
+normalsVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> normalsVis ($/;"	f
+printUsage	simulator.cpp	/^printUsage (const char* progName)$/;"	f
+rgbVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)$/;"	f
+shapesVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> shapesVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)$/;"	f
+simpleVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> simpleVis (pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)$/;"	f
+text_id	simulator.cpp	/^unsigned int text_id = 0;$/;"	v
+viewportsVis	simulator.cpp	/^boost::shared_ptr<pcl::visualization::PCLVisualizer> viewportsVis ($/;"	f

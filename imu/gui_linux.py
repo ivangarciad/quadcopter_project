@@ -1,42 +1,19 @@
 # MinIMU9ArduinoAHRS
 # Pololu MinIMU-9 + Arduino AHRS (Attitude and Heading Reference System)
 
-# Copyright (c) 2011 Pololu Corporation.
-# http://www.pololu.com/
-
-# MinIMU9ArduinoAHRS is based on sf9domahrs by Doug Weibel and Jose Julio:
-# http://code.google.com/p/sf9domahrs/
-
-# sf9domahrs is based on ArduIMU v1.5 by Jordi Munoz and William Premerlani, Jose
-# Julio and Doug Weibel:
-# http://code.google.com/p/ardu-imu/
-
-# MinIMU9ArduinoAHRS is free software: you can redistribute it and/or modify it
-# under the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your option)
-# any later version.
-
-# MinIMU9ArduinoAHRS is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-# more details.
-
-# You should have received a copy of the GNU Lesser General Public License along
-# with MinIMU9ArduinoAHRS. If not, see <http://www.gnu.org/licenses/>.
-
-################################################################################
-
 # This is a test/3D visualization program for the Pololu MinIMU-9 + Arduino
 # AHRS, based on "Test for Razor 9DOF IMU" by Jose Julio, copyright 2009.
 
-# This script needs VPython, pyserial and pywin modules
+# This script needs PyOpenGL and pyserial
 
-# First Install Python 2.6.4 (Python 2.7 also works)
-# Install pywin from http://sourceforge.net/projects/pywin32/
-# Install pyserial from http://sourceforge.net/projects/pyserial/files/
-# Install VPython from http://vpython.org/contents/download_windows.html
+import OpenGL
+OpenGL.ERROR_ON_COPY = True
 
-from visual import * # The visual library only runs in windows.
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
+import time, sys
 import serial
 import string
 import math
