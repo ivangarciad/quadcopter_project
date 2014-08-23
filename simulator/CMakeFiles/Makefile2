@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/igdaza/universidad/tfg/head/quadcopter/simulator
 CMakeFiles/simulator.dir/all:
 	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/depend
 	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/igdaza/universidad/tfg/head/quadcopter/simulator/CMakeFiles  1
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/igdaza/universidad/tfg/head/quadcopter/simulator/CMakeFiles  1 2
 	@echo "Built target simulator"
 .PHONY : CMakeFiles/simulator.dir/all
 
@@ -69,7 +69,7 @@ all: CMakeFiles/simulator.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/simulator.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/igdaza/universidad/tfg/head/quadcopter/simulator/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/igdaza/universidad/tfg/head/quadcopter/simulator/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/simulator.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/igdaza/universidad/tfg/head/quadcopter/simulator/CMakeFiles 0
 .PHONY : CMakeFiles/simulator.dir/rule

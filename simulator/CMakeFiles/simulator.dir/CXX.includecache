@@ -6,8 +6,32 @@
 
 #IncludeRegexTransform: 
 
+/home/igdaza/universidad/tfg/head/quadcopter/simulator/rs232.h
+stdio.h
+-
+string.h
+-
+termios.h
+-
+sys/ioctl.h
+-
+unistd.h
+-
+fcntl.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+limits.h
+-
+windows.h
+-
+
 /home/igdaza/universidad/tfg/head/quadcopter/simulator/simulator.cpp
 iostream
+-
+unistd.h
 -
 boost/thread/thread.hpp
 -
@@ -21,6 +45,12 @@ pcl/visualization/pcl_visualizer.h
 -
 pcl/console/parse.h
 -
+Eigen/Dense
+-
+iostream
+-
+rs232.h
+/home/igdaza/universidad/tfg/head/quadcopter/simulator/rs232.h
 
 /usr/include/eigen3/Eigen/Cholesky
 Core
@@ -2017,10 +2047,6 @@ vector
 -
 vtkCommand.h
 -
-
-/usr/include/qhull/io.h
-
-/usr/include/qhull/mem.h
 
 /usr/include/vtk-5.8/vtkABI.h
 

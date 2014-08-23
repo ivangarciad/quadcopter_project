@@ -111,6 +111,30 @@ simulator/fast:
 	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/build
 .PHONY : simulator/fast
 
+rs232.o: rs232.cpp.o
+.PHONY : rs232.o
+
+# target to build an object file
+rs232.cpp.o:
+	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/rs232.cpp.o
+.PHONY : rs232.cpp.o
+
+rs232.i: rs232.cpp.i
+.PHONY : rs232.i
+
+# target to preprocess a source file
+rs232.cpp.i:
+	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/rs232.cpp.i
+.PHONY : rs232.cpp.i
+
+rs232.s: rs232.cpp.s
+.PHONY : rs232.s
+
+# target to generate assembly for a file
+rs232.cpp.s:
+	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/rs232.cpp.s
+.PHONY : rs232.cpp.s
+
 simulator.o: simulator.cpp.o
 .PHONY : simulator.o
 
@@ -144,6 +168,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... simulator"
+	@echo "... rs232.o"
+	@echo "... rs232.i"
+	@echo "... rs232.s"
 	@echo "... simulator.o"
 	@echo "... simulator.i"
 	@echo "... simulator.s"
