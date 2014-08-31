@@ -18,6 +18,8 @@ int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1}; //Correct directions x,y,z - gyro, 
 // tested with Arduino Uno with ATmega328 and Arduino Duemilanove with ATMega168
 
 #include <Wire.h>
+#include <Servo.h>
+#include <SoftwareSerial.h>
 
 // LSM303 accelerometer: 8 g sensitivity
 // 3.9 mg/digit; 1 g = 256
@@ -58,7 +60,21 @@ int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1}; //Correct directions x,y,z - gyro, 
 #define PRINT_ANALOGS 0 //Will print the analog raw data
 #define PRINT_EULER 1   //Will print the Euler angles Roll, Pitch and Yaw
 
-#define STATUS_LED 13 
+#define STATUS_LED_PIN 13 
+#define rxPin 2     //D2(arduino) --> ACP220(TX)
+#define txPin 3     //D3(arduino) --> ACP220(RX)
+
+void angles_measurements(void);
+
+Servo motor_1;
+Servo motor_2;
+Servo motor_3;
+Servo motor_4;
+
+unsigned int pwm_value_1 = 10;
+unsigned int pwm_value_2 = 10;
+unsigned int pwm_value_3 = 10;
+unsigned int pwm_value_4 = 10;
 
 float G_Dt=0.02;    // Integration time (DCM algorithm)  We will run the integration loop at 50Hz if possible
 
@@ -117,17 +133,49 @@ float Temporary_Matrix[3][3]={
   {0,0,0},
   {0,0,0}
 };
+
+typedef struct t_message
+{
+   long int id_home;
+   long int id_window;
+   long int command;
+   long int time;
+   long int status;
+   long int ack;
+};
+
+t_message message;
+char message_aux[24];
+
+SoftwareSerial apc220(rxPin, txPin);
+
  
 void setup()
 { 
+  init_message();
+  apc220.begin(9600);
   Serial.begin(19200);
-  pinMode (STATUS_LED,OUTPUT);  // Status LED
+  pinMode (STATUS_LED_PIN,OUTPUT);  // Status LED
+
+  motor_1.attach(9);  //attaches the servo on pin 9 to the servo object
+  motor_2.attach(10);  //attaches the servo on pin 10 to the servo object
+  motor_3.attach(4);  // attaches the servo on pin 4 to the servo object
+  motor_4.attach(5);  // attaches the servo on pin 5 to the servo object
+  motor_1.write(0);
+  motor_2.write(0);
+  motor_3.write(0);
+  motor_4.write(0);
+  delay(4);
+  motor_1.write(0);
+  motor_2.write(0);
+  motor_3.write(0);
+  motor_4.write(0);
   
   I2C_Init();
 
   Serial.println("Pololu MinIMU-9 + Arduino AHRS");
 
-  digitalWrite(STATUS_LED,LOW);
+  digitalWrite(STATUS_LED_PIN,LOW);
   delay(1500);
  
   Accel_Init();
@@ -152,7 +200,7 @@ void setup()
   AN_OFFSET[5]-=GRAVITY*SENSOR_SIGN[5];
   
   delay(2000);
-  digitalWrite(STATUS_LED,HIGH);
+  digitalWrite(STATUS_LED_PIN,HIGH);
     
   timer=millis();
   delay(20);
@@ -160,6 +208,29 @@ void setup()
 }
 
 void loop() //Main Loop
+{
+  static boolean init_flag = true;
+  int n = apc220.available();
+
+  if(n > 0)
+  {
+    apc220.readBytes(message_aux, n);
+    Serial.println(message_aux);
+    n = 0;
+  }
+
+  angles_measurements();
+  if (init_flag)
+  {
+    motor_1.write(pwm_value_1);
+    motor_2.write(pwm_value_2);
+    motor_3.write(pwm_value_3);
+    motor_4.write(pwm_value_4);
+    init_flag = false;
+  }
+}
+
+void angles_measurements(void)
 {
   if((millis()-timer)>=20)  // Main loop runs at 50Hz
   {
@@ -192,5 +263,14 @@ void loop() //Main Loop
    
     printdata();
   }
-   
+
 }
+
+void init_message()
+{
+  message.id_window = 0;
+  message.command = 0;
+  message.time = 0;
+  message.status = 0;
+}
+

@@ -50,7 +50,7 @@ main (int argc, char** argv)
     return 0;
   }
 
-  int port_num = 16;
+  int port_num = 24;
   int bps = 19200;
 
   RS232_OpenComport(port_num, bps);
@@ -158,10 +158,11 @@ main (int argc, char** argv)
       }
     }
 
-    viewer->spinOnce (20);
+    viewer->spinOnce (10);
 
     boost::this_thread::sleep (boost::posix_time::microseconds (10000));
     viewer->removeShape("cube");
+    viewer->removeShape("ground");
     viewer = shapesVis(point_cloud_ptr, corner, 2*angle_x, 2*angle_y, angle_z);
 
   }
@@ -181,6 +182,16 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> shapesVis (pcl::PointCloud<
 {
 
   //------------------------------------
+  //-----Add plane -----
+  //------------------------------------
+  pcl::ModelCoefficients coeffs_plane;
+  coeffs_plane.values.push_back(0.0);
+  coeffs_plane.values.push_back(0.0);
+  coeffs_plane.values.push_back(100.0);
+  coeffs_plane.values.push_back(0.0);
+  viewer->addPlane (coeffs_plane, "ground");
+
+  //------------------------------------
   //-----Add shapes at cloud points-----
   //------------------------------------
   //viewer->addLine<pcl::PointXYZRGB> (cloud->points[0], cloud->points[cloud->size() - 1], "line");
@@ -190,28 +201,14 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> shapesVis (pcl::PointCloud<
   //---------------------------------------
   //-----Add shapes at other locations-----
   //---------------------------------------
-  Eigen::Vector3f translation(0.0, 0.0, 0.0);
+  Eigen::Vector3f translation(0.0, 0.0, 0.1/2);
   //Eigen::Quaternionf rotation(0.9238795325112867, 0.0, -0.3826834323650897, 0.0);
   Eigen::Quaternionf rotation(0.0, 0.0, 0.0, 0.0);
   rotation = Eigen::AngleAxisf(angle_x*3.14/180, Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(angle_y*3.14/180, Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(angle_z*3.14/180, Eigen::Vector3f::UnitZ());
 
-  pcl::ModelCoefficients coeffs;
-  coeffs.values.push_back (corner);
-  coeffs.values.push_back (0.0);
-  coeffs.values.push_back (0.0);
-  coeffs.values.push_back (0.0);
-  coeffs.values.push_back (0.0);
-  coeffs.values.push_back (0.0);
-  coeffs.values.push_back (1.0);
-  coeffs.values.push_back (1.0);
-  coeffs.values.push_back (1.0);
-  coeffs.values.push_back (0.5);
-  //viewer->addCube (coeffs, "cube");
-
   viewer->addCube (translation, rotation, 1.0, 1.0, 0.1, "cube");
 
   viewer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 1.0, 0.0, "cube");
-  coeffs.values.clear ();
 
   return (viewer);
 }
