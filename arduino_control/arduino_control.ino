@@ -16,12 +16,16 @@
 #define Compas_Gain_1 0.00094 // G/digit
 #define Compas_Gain_2 0.00105 // G/digit
 
-#define T_CONTROL 100.0 // milliseconds
+#define T_CONTROL 10.0 // milliseconds
+#define PWM_OFFSET 0
 
 // RF Communications
 #define STATUS_LED_PIN 13 
 #define rxPin 2     //D2(arduino) --> ACP220(TX)
 #define txPin 3     //D3(arduino) --> ACP220(RX)
+
+int print_raw_imu_data(void);
+void controller(int ref);
 
 L3G gyro;
 LSM303 compass;
@@ -33,89 +37,140 @@ float G_Dt=0.02;    // Integration time (DCM algorithm)  We will run the integra
 
 long timer1=0;   //general purpuse timer
 long timer2=0;   //general purpuse timer
-long timer_start=0;   //general purpuse timer
+long timer_printf=0;   //general purpuse timer
 
 // Euler angles
 float roll;
 float pitch;
 float yaw;
 
-t_message message;
-char message_aux[24];
-
 SoftwareSerial apc220(rxPin, txPin);
-t_motors motors;
 t_control_acction acction;
 
 t_angular_speed angular_speed;
-t_angular_speed angular_speed_1;
 t_acceleration acceleration;
 t_acceleration north;
 t_angular_position angular_position;
-t_angular_position angular_position_1;
-float altitude;
 
+float altitude;
+float angle_pitch;
+
+float kp, ki;
+
+Servo one;
+Servo two;
+Servo three;
+Servo four;
+
+int stop = 0;
+
+int value_1 = 0;  //Pos width us in PWM signal
+int value_2 = 0;
+int value_3 = 0;
+int value_4 = 0;
+
+int pwm_value = 0;
+float action = 0;
+int min_pwm_action = 700;
+
+char tbs_analog[30];
  
 void setup()
 { 
-  #if SHOW_WITH_IDE_ARDUINO == 1
-  Serial.begin(9600);
-  #endif
-  apc220.begin(9600);
+  Serial.begin(115200);
+  //apc220.begin(9600);
   pinMode (STATUS_LED_PIN,OUTPUT);  // Status LED
   digitalWrite(STATUS_LED_PIN,LOW);
 
-  init_message();
   #if SHOW_WITH_IDE_ARDUINO == 1
   Serial.println("Pololu MinIMU-9 + Arduino AHRS");
   #endif
-  apc220.println("Pololu MinIMU-9 + Arduino AHRS");
+  //apc220.println("Pololu MinIMU-9 + Arduino AHRS");
+  Serial.println("Start Init process");
 
-  init_motors(motors);
-  init_control_acction(acction);
 
   init_angular_speed(angular_speed);
-  init_angular_speed(angular_speed_1);
   init_acceleration(acceleration);
   init_acceleration(north);
   init_angular_position(angular_position);
-  init_angular_position(angular_position_1);
 
   Wire.begin();
 
   init_gyro();
   init_accelerometers();
   init_altimeter();
+  init_motors();
+
+  angle_pitch = 0.0;
+  kp = 0.2663;
+  ki = 0.032;
  
   digitalWrite(STATUS_LED_PIN,HIGH);
 
-  delay(20);
-  timer_start = millis();
+  Serial.println("Init process finshed");
 }
 
 void loop()
 {
+  static int ref = 0;
+
   timer1 = millis();
 
-  rf_module();
-
+  input_references_and_commands();
   imu_measurement();
 
-  motor_reference(motors, 0);
 
-  print_messages();
+  //if(Serial.available()) 
+  if(0) 
+  {
+    Serial.println("UART data received");
+    value_4 = Serial.parseInt();    // Parse an Integer from Serial
+    Serial.println(value_4);
+
+    one.writeMicroseconds(value_4);
+    three.writeMicroseconds(value_4);
+    two.writeMicroseconds(value_4);
+    four.writeMicroseconds(value_4);
+  }
+  else
+  {
+     controller(0);
+     two.writeMicroseconds(min_pwm_action - action);
+     four.writeMicroseconds(min_pwm_action + action);
+  }
+  if ((millis() - timer_printf) > 1000)
+  {
+    //Serial.println(angular_speed.y*10, DEC);
+    print_raw_imu_data();
+  //  timer_printf = millis();
+  }
 
   timer2 = millis();
 
   if (timer2-timer1 > int(T_CONTROL))
   {
-    #if SHOW_WITH_IDE_ARDUINO == 1
-    Serial.println("The T_CONTROL time has been overflow. Review the control loop");
-    #endif
-    apc220.println("The T_CONTROL time has been overflow. Review the control loop");
+    //Serial.println("The T_CONTROL time has been overflow. Review the control loop");
   }
   else
     delay(int(T_CONTROL) - (timer2-timer1));
+}
+
+/** 
+ * Controller pid
+ * @param void void 
+ *
+ * @return Void value is returned. 
+**/
+void controller(int ref)
+{
+  float error = ref - angle_pitch;
+
+  float proporcional = kp*error;
+
+  float integral_error =+ error*T_CONTROL;
+  float integral = ki*integral_error;
+
+  action =  proporcional + integral;
 }
 
 /** 
@@ -137,36 +192,20 @@ int imu_measurement(void)
   angular_speed.y = gyro.g.y*Gyro_Gain_FS2;
   angular_speed.z = gyro.g.z*Gyro_Gain_FS2;
 
-  // g
+  // g(m/ss)
   acceleration.x = (compass.a.x >> 4)*Accel_Gain_FS1;
   acceleration.y = (compass.a.y >> 4)*Accel_Gain_FS1;
   acceleration.z = (compass.a.z >> 4)*Accel_Gain_FS1;
 
-  // G
+  // G(gauss)
   north.x = compass.m.x*Compas_Gain_1;
   north.y = compass.m.y*Compas_Gain_1;
   north.z = compass.m.z*Compas_Gain_2;
 
-  if(acceleration.x > 1.0) acceleration.x = 1.0;
-  if(acceleration.y > 1.0) acceleration.y = 1.0;
-  if(acceleration.z > 1.0) acceleration.z = 1.0;
-  if(acceleration.x < -1.0) acceleration.x = -1.0;
-  if(acceleration.y < -1.0) acceleration.y = -1.0;
-  if(acceleration.z < -1.0) acceleration.z = -1.0;
-
-  // The complementary filter
-  float gain = 0;
-
-    angular_position.x = gain*(angular_position_1.x + angular_speed.x*T_CONTROL/1000) + (1-gain)*acos(acceleration.z)*180/3.14;
-
-  // Temporar memory system
-  angular_speed_1.x = angular_speed.x;
-  angular_speed_1.y = angular_speed.y;
-  angular_speed_1.z = angular_speed.z;
-
-  angular_position_1.x = angular_position.x;
-  angular_position_1.y = angular_position.y;
-  angular_position_1.z = angular_position.z;
+  // Complementary filter
+  float factor = 0.0;
+  if (abs(acceleration.x) > 0 && abs(acceleration.x) < 1) 
+    angle_pitch = factor*(angle_pitch + angular_speed.y*T_CONTROL/1000.0)+(1-factor)*asin(acceleration.x)*180/3.1416;
 
   return (ret);
 }
@@ -179,64 +218,24 @@ int imu_measurement(void)
  *
  * @return Void value is returned. 
 **/
-int init_message(void)
-{
-  message.id_window = 0;
-  message.command = 0;
-  message.time = 0;
-  message.status = 0;
 
-  return 0;
+int init_motors(void)
+{
+  one.attach(5);  //attaches the servo on pin 9 to the servo object
+  two.attach(10);  //attaches the servo on pin 10 to the servo object
+  three.attach(4);  // attaches the servo on pin 4 to the servo object
+  four.attach(9);  // attaches the servo on pin 5 to the servo object
+
+  Serial.println("Conect ESC power");
+
+  one.writeMicroseconds(pwm_value);
+  two.writeMicroseconds(pwm_value);
+  three.writeMicroseconds(pwm_value);
+  four.writeMicroseconds(pwm_value);
+  delay(10000);
+  Serial.println("Finished motor initialization");
 }
 
-/** 
- * Brieft coment about the function. 
- * @param x x coment
- * @param y y coment
- * @param st st coment
- *
- * @return Void value is returned. 
-**/
-
-int init_motors(t_motors motors)
-{
-  motors.one.attach(9);  //attaches the servo on pin 9 to the servo object
-  motors.two.attach(10);  //attaches the servo on pin 10 to the servo object
-  motors.three.attach(4);  // attaches the servo on pin 4 to the servo object
-  motors.four.attach(5);  // attaches the servo on pin 5 to the servo object
-
-  motors.one.write(0);
-  motors.two.write(0);
-  motors.three.write(0);
-  motors.four.write(0);
-  
-  delay(4);
-
-  motors.one.write(0);
-  motors.two.write(0);
-  motors.three.write(0);
-  motors.four.write(0);
-}
-
-/** 
- * Brieft coment about the function. 
- * @param x x coment
- * @param y y coment
- * @param st st coment
- *
- * @return Void value is returned. 
-**/
-int init_control_acction(t_control_acction acction)
-{
-  int ret = 0;
-
-  acction.pwm_value_1 = 0;
-  acction.pwm_value_2 = 0;
-  acction.pwm_value_3 = 0;
-  acction.pwm_value_4 = 0;
-
-  return (ret);
-}
 
 int init_acceleration(t_acceleration acceleration)
 {
@@ -303,7 +302,7 @@ int init_gyro(void)
     #if SHOW_WITH_IDE_ARDUINO == 1
     Serial.println("Failed to autodetect gyro type!");
     #endif
-    apc220.println("Failed to autodetect gyro type!");
+    //apc220.println("Failed to autodetect gyro type!");
     while (1);
   }
 
@@ -371,7 +370,7 @@ int init_altimeter(void)
     #if SHOW_WITH_IDE_ARDUINO == 1
     Serial.println("Failed to autodetect pressure sensor!");
     #endif
-    apc220.println("Failed to autodetect pressure sensor!");
+    //apc220.println("Failed to autodetect pressure sensor!");
     ret = -1;
   }
 
@@ -388,16 +387,8 @@ int init_altimeter(void)
  *
  * @return Void value is returned. 
 **/
-int motor_reference(t_motors motors, int value)
+void motor_reference(int value)
 {
-  int ret = 0;
-
-  motors.one.write(value);
-  motors.two.write(value);
-  motors.three.write(value);
-  motors.four.write(value);
-
-  return (ret);
 }
 
 /** 
@@ -408,17 +399,92 @@ int motor_reference(t_motors motors, int value)
  *
  * @return Void value is returned. 
 **/
-int rf_module(void)
+void input_references_and_commands(void)
 {
-  int n = apc220.available();
-
-  if(n > 0)
+  if(Serial.available() > 0)
   {
-    apc220.readBytes(message_aux, n);
-    n = 0;
-  }
+    char aux = Serial.read();
 
-  return (n);
+    switch (aux)
+    {
+      case '1':
+        /* Incrementar velocidad motor 1 */
+        value_1 += 1;
+        one.writeMicroseconds(value_1);
+        Serial.print("Motor one ");
+        Serial.println(value_1);
+        break;
+      case 'q':
+        /* Decrementar velocidad motor 1 */
+        value_1 -= 1;
+        one.writeMicroseconds(value_1);
+        Serial.print("Motor one ");
+        Serial.println(value_1);
+        break;
+      case '2':
+        /* Incrementar velocidad motor 2 */
+        value_2 += 1;
+        two.writeMicroseconds(value_2);
+        Serial.print("Motor two ");
+        Serial.println(value_2);
+        break;
+      case 'w':
+        /* Decrementar velocidad motor 2 */
+        value_2 -= 1;
+        two.writeMicroseconds(value_2);
+        Serial.print("Motor two ");
+        Serial.println(value_2);
+        break;
+      case '3':
+        /* Incrementar velocidad motor 3 */
+        value_3 += 1;
+        three.writeMicroseconds(value_3);
+        Serial.print("Motor three ");
+        Serial.println(value_3);
+        break;
+      case 'e':
+        /* Decrementar velocidad motor 3 */
+        value_3 -= 1;
+        three.writeMicroseconds(value_3);
+        Serial.print("Motor three ");
+        Serial.println(value_3);
+        break;
+      case '4':
+        /* Incrementar velocidad motor 4 */
+        value_4 += 1;
+        four.writeMicroseconds(value_4);
+        Serial.print("Motor four ");
+        Serial.println(value_4);
+        break;
+      case 'r':
+        /* Decrementar velocidad motor 4 */
+        value_4 -= 1;
+        four.writeMicroseconds(value_4);
+        Serial.print("Motor four ");
+        Serial.println(value_4);
+        break;
+      case '0':
+        /* Stop */
+        kp = 0;
+        ki = 0;
+        action = 0;
+        min_pwm_action = 0;
+        Serial.println("Parada emergencia");
+        break;
+      case 'P':
+        kp += 0.001;
+        break;
+      case 'p':
+        kp -= 0.001;
+        break;
+      case 'I':
+        ki += 0.001;
+        break;
+      case 'i':
+        ki -= 0.001;
+        break;
+    }
+  }
 }
 
 /** 
@@ -429,85 +495,34 @@ int rf_module(void)
  *
  * @return Void value is returned. 
 **/
-int print_messages(void)
+int print_raw_imu_data(void)
 {
   int ret = 0;
-  static char tbs_analog[77];
 
-  //sprintf(tbs_analog, "S:%07.2f:%07.2f:%07.2f:A:%07.2f:%07.2f:%07.2f:C:%07.2f:%07.2f:%07.2f", 
-  sprintf(tbs_analog, "S:%.2f:%.2f:%.2f:A:%.2f:%.2f:%.2f:C:%.2f:%.2f:%.2f", 
-      angular_speed.x, 
-      angular_speed.y, 
-      angular_speed.z,
-      acceleration.x, 
-      acceleration.y, 
-      acceleration.z,
-      north.x, 
-      north.y, 
-      north.z);
+ //sprintf(tbs_analog, "S:%.2f:%.2f:%.2f:A:%.2f:%.2f:%.2f:C:%.2f:%.2f:%.2f:Al:%.2f:Ac:%.2f", 
+ //    angular_speed.x, 
+ //    angular_speed.y, 
+ //    angular_speed.z,
+ //    acceleration.x, 
+ //    acceleration.y, 
+ //    acceleration.z,
+ //    north.x, 
+ //    north.y, 
+ //    north.z,
+ //    altitude,
+ //    action);
 
-  apc220.print(tbs_analog);
-  apc220.println();
+  sprintf(tbs_analog, "S:%7.2f:%7.2f:%7.3f:%7.3f:%7.3f", 
+      acceleration.y,
+      angle_pitch,
+      kp,
+      ki,
+      action);
 
-  #if ANGULAR_POSITION == 1
-  sprintf(tbs_analog, "P:%07.2f:%07.2f:%07.2f:%07.2f:", 
-      angular_position.x, 
-      angular_position.y, 
-      angular_position.z,
-      altitude);
-
-  #if SHOW_WITH_IDE_ARDUINO == 1
+  //#if SHOW_WITH_IDE_ARDUINO == 1
   Serial.print(tbs_analog);
   Serial.println();
-  #endif
-  apc220.print(tbs_analog);
-  apc220.println();
-  #endif
-
-  #if ANGULAR_SPEED == 1
-  sprintf(tbs_analog, "S: %07.2f ; %07.2f ; %07.2f ; %07.2f ;", 
-      angular_speed.x, 
-      angular_speed.y, 
-      angular_speed.z,
-      0.0);
-
-  #if SHOW_WITH_IDE_ARDUINO == 1
-  Serial.print(tbs_analog);
-  Serial.println();
-  #endif
-  apc220.print(tbs_analog);
-  apc220.println();
-  #endif
-
-  #if ACCELERATION == 1
-  sprintf(tbs_analog, "A: %07.2f ; %07.2f ; %07.2f ; %07.2f ;", 
-      acceleration.x, 
-      acceleration.y, 
-      acceleration.z,
-      0.0);
-
-  #if SHOW_WITH_IDE_ARDUINO == 1
-  Serial.print(tbs_analog);
-  Serial.println();
-  #endif
-  apc220.print(tbs_analog);
-  apc220.println();
-  #endif
-
-  #if COMPASS == 1
-  sprintf(tbs_analog, "N: %07.2f ; %07.2f ; %07.2f ; %07.2f ;", 
-      north.x, 
-      north.y, 
-      north.z,
-      0.0);
-
-  #if SHOW_WITH_IDE_ARDUINO == 1
-  Serial.print(tbs_analog);
-  Serial.println();
-  #endif
-  apc220.print(tbs_analog);
-  apc220.println();
-  #endif
+  //#endif
 
   return(ret);
 }

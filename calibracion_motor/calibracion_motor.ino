@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 #define MAX_SIGNAL 2000
-#define MIN_SIGNAL 10
+#define MIN_SIGNAL 1000
 #define MOTOR_PIN 9
 
 Servo motor;
@@ -27,6 +27,14 @@ void setup() {
 
 }
 
-void loop() {
-
+void loop() 
+{
+  static int value_4 = 0;
+  
+  if(Serial.available())
+  {
+    value_4 = Serial.parseInt();    // Parse an Integer from Serial
+    Serial.println(value_4);
+  }
+  motor.writeMicroseconds(value_4);
 }

@@ -15,7 +15,8 @@ The Quadcopter simulator is implemented with PCL library. The source code is loc
 
 Motores 
 
-Velocidad de rotación: 1800 RMP / V
+- A2208-12 mystery 
+- Velocidad de rotación: 1800 RMP / V
 - Diámetro del eje: 3,17 mm
 - No-corriente de carga: 0.8A
 - Corriente de carga: 16A
@@ -50,3 +51,12 @@ Datos del ESC
 
 IMU
 AltIMU-10 Gyro, Accelerometer, Compass, and Altimeter (L3GD20, LSM303DLHC, and LPS331AP Carrier)
+
+
+Bateria
+- Capacidad: 4500mAh
+- Voltaje: 11.1V
+- Velocidad de descarga: 30C
+- 3 células
+- Conector tipo T
+- Excelente para proyecto DIY

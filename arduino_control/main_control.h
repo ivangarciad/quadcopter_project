@@ -10,15 +10,7 @@
 #define ANGULAR_SPEED 0 
 #define ACCELERATION 0 
 #define COMPASS 0 
-#define SHOW_WITH_IDE_ARDUINO 0 
-
-typedef struct t_motors
-{
-  Servo one;
-  Servo two;
-  Servo three;
-  Servo four;
-};
+#define SHOW_WITH_IDE_ARDUINO 0
 
 typedef struct t_control_acction
 {
@@ -59,7 +51,7 @@ typedef struct t_message
    long int ack;
 };
 
-int init_motors(t_motors motors);
+int init_motors();
 int init_control_acction(t_control_acction acction);
 int init_acceleration(t_acceleration acceleration);
 int init_angular_speed(t_angular_speed angular_speed);
@@ -69,7 +61,7 @@ int init_accelerometers(void);
 int init_brujula(void);
 int init_altimeter(void);
 
-int motor_reference(t_motors motors, int value);
+void motor_reference(int value);
 int rf_module(void);
 
 int imu_measurement(void);
