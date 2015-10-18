@@ -48,9 +48,12 @@ SoftwareSerial apc220(rxPin, txPin);
 t_control_acction acction;
 
 t_angular_speed angular_speed;
+t_angular_speed angular_speed_kalman;
+t_angular_speed angular_speed_1;
 t_acceleration acceleration;
 t_acceleration north;
 t_angular_position angular_position;
+t_angular_position angular_position_1;
 
 float altitude;
 float angle_pitch;
@@ -88,14 +91,17 @@ void setup()
   //apc220.println("Pololu MinIMU-9 + Arduino AHRS");
   Serial.println("Start Init process");
 
-
+  // Init variables
+  //init_control_action(acction);
   init_angular_speed(angular_speed);
   init_acceleration(acceleration);
   init_acceleration(north);
   init_angular_position(angular_position);
 
+  // Init used interface for sensors
   Wire.begin();
 
+  // Init sensores
   init_gyro();
   init_accelerometers();
   init_altimeter();
@@ -202,12 +208,58 @@ int imu_measurement(void)
   north.y = compass.m.y*Compas_Gain_1;
   north.z = compass.m.z*Compas_Gain_2;
 
-  // Complementary filter
-  float factor = 0.0;
-  if (abs(acceleration.x) > 0 && abs(acceleration.x) < 1) 
-    angle_pitch = factor*(angle_pitch + angular_speed.y*T_CONTROL/1000.0)+(1-factor)*asin(acceleration.x)*180/3.1416;
+  // The complementary filter
+  //angular_position.x = complementary_filter(angular_position_1.x, angular_speed.x, acceleration.z);
+
+  // The Kalman filter
+  angular_speed_kalman.x = kalman_filter(angular_speed.x);
+
+  // Temporar memory system
+  angular_speed_1.x = angular_speed.x;
+  angular_speed_1.y = angular_speed.y;
+  angular_speed_1.z = angular_speed.z;
+
+  angular_position_1.x = angular_position.x;
+  angular_position_1.y = angular_position.y;
+  angular_position_1.z = angular_position.z;
 
   return (ret);
+}
+
+float complementary_filter(float angular_position_prev, float angular_speed, float acceleration)
+{
+  float ret = 0;
+  float gain = 0;
+  
+  ret = gain*(angular_position_prev + angular_speed*T_CONTROL/1000) + (1-gain)*acos(acceleration)*180/3.14;
+
+  return ret;
+}
+
+float kalman_filter(float measurement)
+{
+  float ret = 0;
+  float desv_sensor = 0.5;
+  float desv_system = 0;
+  float varianza_sensor = desv_sensor * desv_sensor;
+  float varianza_system = desv_system * desv_system;
+  
+  static float x_k_1 = 0;
+  static float P_k_1 = 1;
+
+  // Predicción
+  float x__k = x_k_1;
+  float P__k = P_k_1;
+
+  // Corrección
+  float K_k = P__k / (P__k + varianza_sensor);
+  float x_k = x__k + K_k * (measurement - x__k);
+  float P_k = (1 - K_k)*P__k;
+
+  x_k_1 = x_k;
+  P_k_1 = P_k;
+
+  return ret;
 }
 
 /** 
