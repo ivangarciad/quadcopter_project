@@ -59,6 +59,13 @@ typedef struct t_motors
   Servo four;
 };
 
+typedef struct t_kalman
+{
+  float x_k;
+  float K_k;
+  float P_k;
+};
+
 
 int init_motors();
 int init_control_action(t_control_acction acction);

@@ -24,8 +24,28 @@
 #define rxPin 2     //D2(arduino) --> ACP220(TX)
 #define txPin 3     //D3(arduino) --> ACP220(RX)
 
+typedef struct t_datalog 
+{
+    char id;
+    char id_2;
+    int timestamp;
+    int reference_pos;
+    int angulo_Accx;
+    int angulo_Accy;
+    int angulo_Accz;                              
+    int angulo_Gyrox;
+    int angulo_Gyroy;
+    int angulo_Gyroz;
+    int angulo_Filtrox;
+    int angulo_Filtroy;
+    int angulo_Filtroz;   
+} t_datalog;//definimos tipo struct t_datalog
+
+
 int print_raw_imu_data(void);
 void controller(int ref);
+void init_datalog(t_datalog* datalog);
+void send_datalog(t_datalog datalog);
 
 L3G gyro;
 LSM303 compass;
@@ -54,6 +74,7 @@ t_acceleration acceleration;
 t_acceleration north;
 t_angular_position angular_position;
 t_angular_position angular_position_1;
+t_kalman kalman;
 
 float altitude;
 float angle_pitch;
@@ -94,6 +115,7 @@ void setup()
   // Init variables
   //init_control_action(acction);
   init_angular_speed(angular_speed);
+  init_angular_speed(angular_speed_kalman);
   init_acceleration(acceleration);
   init_acceleration(north);
   init_angular_position(angular_position);
@@ -114,6 +136,13 @@ void setup()
   digitalWrite(STATUS_LED_PIN,HIGH);
 
   Serial.println("Init process finshed");
+  int size = sizeof(t_datalog);
+  Serial.println("sizeof(t_datalog");
+  Serial.print(size);
+  t_datalog datalog;
+  init_datalog(&datalog);
+  while(1)
+    send_datalog(datalog);
 }
 
 void loop()
@@ -212,7 +241,7 @@ int imu_measurement(void)
   //angular_position.x = complementary_filter(angular_position_1.x, angular_speed.x, acceleration.z);
 
   // The Kalman filter
-  angular_speed_kalman.x = kalman_filter(angular_speed.x);
+  kalman = kalman_filter(angular_speed.x);
 
   // Temporar memory system
   angular_speed_1.x = angular_speed.x;
@@ -236,30 +265,38 @@ float complementary_filter(float angular_position_prev, float angular_speed, flo
   return ret;
 }
 
-float kalman_filter(float measurement)
+t_kalman kalman_filter(float measurement)
 {
-  float ret = 0;
-  float desv_sensor = 0.5;
-  float desv_system = 0;
-  float varianza_sensor = desv_sensor * desv_sensor;
-  float varianza_system = desv_system * desv_system;
+
+  t_kalman kalman_ret;
+
+  float desv_sensor = 0.2;
+  float desv_system = 0.0;
+  float A = 1.05;
+
+  float var_sensor = desv_sensor * desv_sensor;
+  float var_system = desv_system * desv_system;
   
-  static float x_k_1 = 0;
-  static float P_k_1 = 1;
+  static float x_k_1 = 0.0;
+  static float P_k_1 = 1.0;
 
   // Predicción
   float x__k = x_k_1;
-  float P__k = P_k_1;
+  float P__k = A*P_k_1 + var_system;
 
   // Corrección
-  float K_k = P__k / (P__k + varianza_sensor);
+  float K_k = P__k / (P__k + var_sensor);
   float x_k = x__k + K_k * (measurement - x__k);
   float P_k = (1 - K_k)*P__k;
 
   x_k_1 = x_k;
   P_k_1 = P_k;
 
-  return ret;
+  kalman_ret.x_k = x_k;
+  kalman_ret.K_k = K_k;
+  kalman_ret.P_k = P_k;
+
+  return kalman_ret;
 }
 
 /** 
@@ -564,11 +601,18 @@ int print_raw_imu_data(void)
  //    altitude,
  //    action);
 
-  sprintf(tbs_analog, "S:%7.2f:%7.2f:%7.3f:%7.3f:%7.3f", 
-      acceleration.y,
-      angle_pitch,
-      kp,
-      ki,
+// sprintf(tbs_analog, "S:%7.2f:%7.2f:%7.3f:%7.3f:%7.3f", 
+//     acceleration.y,
+//     angle_pitch,
+//     kp,
+//     ki,
+//     action);
+
+  sprintf(tbs_analog, "S:%7.2f:%7.5f:%7.5f:%7.5f:%7.2f", 
+      angular_speed.x,
+      kalman.x_k,
+      kalman.K_k,
+      kalman.P_k,
       action);
 
   //#if SHOW_WITH_IDE_ARDUINO == 1
@@ -577,4 +621,26 @@ int print_raw_imu_data(void)
   //#endif
 
   return(ret);
+}
+void send_datalog(t_datalog datalog)
+{
+  Serial.write((uint8_t*) &datalog, sizeof(t_datalog));
+}
+
+void init_datalog(t_datalog* datalog)
+{
+    datalog->id = 0x21;
+    datalog->id_2 = 0x22;
+    datalog->timestamp = 0;
+    datalog->reference_pos = 1;
+    datalog->angulo_Accx = 2;
+    datalog->angulo_Accy = 3;
+    datalog->angulo_Accz = 4;
+    datalog->angulo_Gyrox = 0;
+    datalog->angulo_Gyroy = 0;
+    datalog->angulo_Gyroz = 0;
+    datalog->angulo_Filtrox = 0;
+    datalog->angulo_Filtroy = 0;
+    datalog->angulo_Filtroz = 0;
+
 }
