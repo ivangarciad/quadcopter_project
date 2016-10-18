@@ -1,0 +1,101 @@
+acceleration	./arduino_control.ino	/^t_acceleration acceleration;$/;"	v
+ACCELERATION	./main_control.h	11;"	d
+Accel_Gain_FS1	./arduino_control.ino	15;"	d	file:
+acction	./arduino_control.ino	/^t_control_acction acction;$/;"	v
+ack	./main_control.h	/^   long int ack;$/;"	m	struct:t_message
+altitude	./arduino_control.ino	/^float altitude;$/;"	v
+angular_position_1	./arduino_control.ino	/^t_angular_position angular_position_1;$/;"	v
+angular_position	./arduino_control.ino	/^t_angular_position angular_position;$/;"	v
+ANGULAR_POSITION	./main_control.h	9;"	d
+angular_speed_1	./arduino_control.ino	/^t_angular_speed angular_speed_1;$/;"	v
+angular_speed	./arduino_control.ino	/^t_angular_speed angular_speed;$/;"	v
+angular_speed_kalman	./arduino_control.ino	/^t_angular_speed angular_speed_kalman;$/;"	v
+ANGULAR_SPEED	./main_control.h	10;"	d
+command	./main_control.h	/^   long int command;$/;"	m	struct:t_message
+Compas_Gain_1	./arduino_control.ino	16;"	d	file:
+Compas_Gain_2	./arduino_control.ino	17;"	d	file:
+compass	./arduino_control.ino	/^LSM303 compass;$/;"	v
+COMPASS	./main_control.h	12;"	d
+complementary_filter	./arduino_control.ino	/^float complementary_filter(float angular_position_prev, float angular_speed, float acceleration)$/;"	f
+four	./main_control.h	/^  Servo four;$/;"	m	struct:t_motors
+G_Dt	./arduino_control.ino	/^float G_Dt=0.02;    \/\/ Integration time (DCM algorithm)  We will run the integration loop at 50Hz if possible$/;"	v
+gyro	./arduino_control.ino	/^L3G gyro;$/;"	v
+Gyro_Gain_FS1	./arduino_control.ino	10;"	d	file:
+Gyro_Gain_FS2	./arduino_control.ino	11;"	d	file:
+Gyro_Gain_FS3	./arduino_control.ino	12;"	d	file:
+Gyro_Scaled	./main_control.h	7;"	d
+id_home	./main_control.h	/^   long int id_home;$/;"	m	struct:t_message
+id_window	./main_control.h	/^   long int id_window;$/;"	m	struct:t_message
+imu_measurement	./arduino_control.ino	/^int imu_measurement(void)$/;"	f
+init_acceleration	./arduino_control.ino	/^int init_acceleration(t_acceleration acceleration)$/;"	f
+init_accelerometers	./arduino_control.ino	/^int init_accelerometers(void)$/;"	f
+init_altimeter	./arduino_control.ino	/^int init_altimeter(void)$/;"	f
+init_angular_position	./arduino_control.ino	/^int init_angular_position(t_angular_position angular_position)$/;"	f
+init_angular_speed	./arduino_control.ino	/^int init_angular_speed(t_angular_speed angular_speed)$/;"	f
+init_brujula	./arduino_control.ino	/^int init_brujula(void)$/;"	f
+init_control_acction	./arduino_control.ino	/^int init_control_acction(t_control_acction acction)$/;"	f
+init_gyro	./arduino_control.ino	/^int init_gyro(void)$/;"	f
+init_message	./arduino_control.ino	/^int init_message(void)$/;"	f
+init_motors	./arduino_control.ino	/^int init_motors(t_motors motors)$/;"	f
+kalman_filter	./arduino_control.ino	/^float kalman_filter(float measurement)$/;"	f
+loop	./arduino_control.ino	/^void loop()$/;"	f
+MAIN_CONTROL_H	./main_control.h	2;"	d
+message	./arduino_control.ino	/^t_message message;$/;"	v
+message_aux	./arduino_control.ino	/^char message_aux[24];$/;"	v
+motor_reference	./arduino_control.ino	/^int motor_reference(t_motors motors, int value)$/;"	f
+motors	./arduino_control.ino	/^t_motors motors;$/;"	v
+north	./arduino_control.ino	/^t_acceleration north;$/;"	v
+one	./main_control.h	/^  Servo one;$/;"	m	struct:t_motors
+pitch	./arduino_control.ino	/^float pitch;$/;"	v
+print_messages	./arduino_control.ino	/^int print_messages(void)$/;"	f
+ps	./arduino_control.ino	/^LPS331 ps;$/;"	v
+pwm_value_1	./main_control.h	/^  unsigned int pwm_value_1;$/;"	m	struct:t_control_acction
+pwm_value_2	./main_control.h	/^  unsigned int pwm_value_2;$/;"	m	struct:t_control_acction
+pwm_value_3	./main_control.h	/^  unsigned int pwm_value_3;$/;"	m	struct:t_control_acction
+pwm_value_4	./main_control.h	/^  unsigned int pwm_value_4;$/;"	m	struct:t_control_acction
+rf_module	./arduino_control.ino	/^int rf_module(void)$/;"	f
+roll	./arduino_control.ino	/^float roll;$/;"	v
+rxPin	./arduino_control.ino	23;"	d	file:
+SENSOR_SIGN	./arduino_control.ino	/^int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1}; \/\/Correct directions x,y,z - gyro, accelerometer, magnetometer$/;"	v
+setup	./arduino_control.ino	/^void setup()$/;"	f
+SHOW_WITH_IDE_ARDUINO	./main_control.h	13;"	d
+STATUS_LED_PIN	./arduino_control.ino	22;"	d	file:
+status	./main_control.h	/^   long int status;$/;"	m	struct:t_message
+t_acceleration	./main_control.h	/^typedef struct t_acceleration$/;"	s
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+t_angular_position	./main_control.h	/^typedef struct t_angular_position$/;"	s
+t_angular_speed	./main_control.h	/^typedef struct t_angular_speed$/;"	s
+t_control_acction	./main_control.h	/^typedef struct t_control_acction$/;"	s
+T_CONTROL	./arduino_control.ino	19;"	d	file:
+three	./main_control.h	/^  Servo three;$/;"	m	struct:t_motors
+time	./main_control.h	/^   long int time;$/;"	m	struct:t_message
+timer1	./arduino_control.ino	/^long timer1=0;   \/\/general purpuse timer$/;"	v
+timer2	./arduino_control.ino	/^long timer2=0;   \/\/general purpuse timer$/;"	v
+timer_start	./arduino_control.ino	/^long timer_start=0;   \/\/general purpuse timer$/;"	v
+t_message	./main_control.h	/^typedef struct t_message$/;"	s
+t_motors	./main_control.h	/^typedef struct t_motors$/;"	s
+ToDeg	./main_control.h	5;"	d
+ToRad	./main_control.h	4;"	d
+two	./main_control.h	/^  Servo two;$/;"	m	struct:t_motors
+txPin	./arduino_control.ino	24;"	d	file:
+x	./main_control.h	/^  float x;$/;"	m	struct:t_acceleration
+x	./main_control.h	/^  float x;$/;"	m	struct:t_angular_position
+x	./main_control.h	/^  float x;$/;"	m	struct:t_angular_speed
+yaw	./arduino_control.ino	/^float yaw;$/;"	v
+y	./main_control.h	/^  float y;$/;"	m	struct:t_acceleration
+y	./main_control.h	/^  float y;$/;"	m	struct:t_angular_position
+y	./main_control.h	/^  float y;$/;"	m	struct:t_angular_speed
+z	./main_control.h	/^  float z;$/;"	m	struct:t_acceleration
+z	./main_control.h	/^  float z;$/;"	m	struct:t_angular_position
+z	./main_control.h	/^  float z;$/;"	m	struct:t_angular_speed
